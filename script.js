@@ -26,7 +26,7 @@ async function main(userMessage) {
   conversationHistory.push({ role: 'user', content: userMessage });
 
   // Let the user know the assistant is working on a reply.
-  responseContainer.textContent = 'thinking...';
+  responseContainer.textContent = 'Thinking...';
 
   // Send a POST request to the OpenAI API
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
