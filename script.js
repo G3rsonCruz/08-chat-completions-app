@@ -3,6 +3,9 @@ const chatForm = document.getElementById('chatForm');
 const userInput = document.getElementById('userInput');
 const responseContainer = document.getElementById('response');
 
+// Replace this with your deployed Cloudflare Worker URL.
+const workerUrl = 'https://wanderbot-worker.cruzcarcg.workers.dev/';
+
 // Keep the system instructions and conversation messages for each request.
 const conversationHistory = [
   {
@@ -15,8 +18,13 @@ const conversationHistory = [
 
 chatForm.addEventListener('submit', (event) => {
   event.preventDefault();
-  // Save the message before clearing the input.
-  const userMessage = userInput.value;
+
+  const userMessage = userInput.value.trim();
+
+  if (!userMessage) {
+    return;
+  }
+
   userInput.value = '';
   main(userMessage).catch((error) => {
     console.error('Failed to get a response from the API:', error);
@@ -25,34 +33,24 @@ chatForm.addEventListener('submit', (event) => {
 });
 
 async function main(userMessage) {
-  // Let the user know the assistant is working on a reply.
   responseContainer.textContent = 'Thinking...';
 
-  // Include the new question without saving it until the request succeeds.
   const messages = [...conversationHistory, { role: 'user', content: userMessage }];
 
-  // Send a POST request to the OpenAI API
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST', // We are POST-ing data to the API
+  const response = await fetch(workerUrl, {
+    method: 'POST',
     headers: {
-      'Content-Type': 'application/json', // Set the content type to JSON
-      'Authorization': `Bearer ${apiKey}` // Include the API key for authorization
+      'Content-Type': 'application/json'
     },
-    // Send model details and system message
-    body: JSON.stringify({
-      model: 'gpt-4o',
-      messages,
-      max_tokens: 900, // Limit the response to 900 tokens
-      temperature: 0.5, // Set the creativity level of the response
-      frequency_penalty: 0.8, // Discourage repetitive responses
-    })
+    body: JSON.stringify({ messages })
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed with status ${response.status}`);
+    const errorData = await response.json().catch(() => null);
+    const errorMessage = errorData?.error?.message || 'API request failed';
+    throw new Error(`${errorMessage} (status ${response.status})`);
   }
 
-  // Parse and store the response data
   const result = await response.json();
   const assistantMessage = result.choices?.[0]?.message?.content;
 
@@ -60,9 +58,7 @@ async function main(userMessage) {
     throw new Error('API response did not contain an assistant message');
   }
 
-  // Save the question and reply so they are included with the next question.
   conversationHistory.push({ role: 'user', content: userMessage });
   conversationHistory.push({ role: 'assistant', content: assistantMessage });
-  // Show only the latest reply.
   responseContainer.textContent = assistantMessage;
-};
+}
