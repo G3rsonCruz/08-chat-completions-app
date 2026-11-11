@@ -43,7 +43,7 @@ async function main(userMessage) {
       model: 'gpt-4o',
       messages,
       max_tokens: 900, // Limit the response to 900 tokens
-      temperature: 0.7, // Set the creativity level of the response
+      temperature: 0.5, // Set the creativity level of the response
     })
   });
 
