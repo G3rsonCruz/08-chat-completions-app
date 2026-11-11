@@ -44,7 +44,7 @@ async function main(userMessage) {
       messages,
       max_tokens: 900, // Limit the response to 900 tokens
       temperature: 0.5, // Set the creativity level of the response
-      frequency_penalty: 0.5, // Discourage repetitive responses
+      frequency_penalty: 0.8, // Discourage repetitive responses
     })
   });
 
