@@ -42,7 +42,7 @@ async function main(userMessage) {
     body: JSON.stringify({
       model: 'gpt-4o',
       messages,
-      max_tokens: 200, // Limit the response to 500 tokens
+      max_tokens: 900, // Limit the response to 900 tokens
     })
   });
 
