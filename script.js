@@ -43,9 +43,6 @@ async function main(userMessage) {
   const assistantMessage = result.choices[0].message.content;
   // Save the reply so it is included with the next question.
   conversationHistory.push({ role: 'assistant', content: assistantMessage });
-  // Show the full conversation so earlier messages stay visible.
-  responseContainer.textContent = conversationHistory
-    .slice(1)
-    .map((message) => `${message.role === 'user' ? 'You' : 'WanderBot'}: ${message.content}`)
-    .join('\n\n');
+  // Show only the latest reply.
+  responseContainer.textContent = assistantMessage;
 };
