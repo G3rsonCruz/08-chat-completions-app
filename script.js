@@ -18,15 +18,18 @@ chatForm.addEventListener('submit', (event) => {
   // Save the message before clearing the input.
   const userMessage = userInput.value;
   userInput.value = '';
-  main(userMessage);
+  main(userMessage).catch((error) => {
+    console.error('Failed to get a response from the API:', error);
+    responseContainer.textContent = 'Sorry, something went wrong while getting a response. Please try again.';
+  });
 });
 
 async function main(userMessage) {
-  // Add the new question so the API can see the conversation so far.
-  conversationHistory.push({ role: 'user', content: userMessage });
-
   // Let the user know the assistant is working on a reply.
   responseContainer.textContent = 'Thinking...';
+
+  // Include the new question without saving it until the request succeeds.
+  const messages = [...conversationHistory, { role: 'user', content: userMessage }];
 
   // Send a POST request to the OpenAI API
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -38,13 +41,24 @@ async function main(userMessage) {
     // Send model details and system message
     body: JSON.stringify({
       model: 'gpt-4o',
-      messages: conversationHistory
+      messages
     })
   });
+
+  if (!response.ok) {
+    throw new Error(`API request failed with status ${response.status}`);
+  }
+
   // Parse and store the response data
   const result = await response.json();
-  const assistantMessage = result.choices[0].message.content;
-  // Save the reply so it is included with the next question.
+  const assistantMessage = result.choices?.[0]?.message?.content;
+
+  if (typeof assistantMessage !== 'string') {
+    throw new Error('API response did not contain an assistant message');
+  }
+
+  // Save the question and reply so they are included with the next question.
+  conversationHistory.push({ role: 'user', content: userMessage });
   conversationHistory.push({ role: 'assistant', content: assistantMessage });
   // Show only the latest reply.
   responseContainer.textContent = assistantMessage;
