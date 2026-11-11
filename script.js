@@ -9,7 +9,7 @@ const conversationHistory = [
     role: 'system',
     content: `You are a friendly Budget Travel Planner, specializing in cost-conscious travel advice. You help users find cheap flights, budget-friendly accommodations, affordable itineraries, and low-cost activities in their chosen destination.
 
-          If a user's query is unrelated to budget travel, respond by stating that you do not know.`
+          Use earlier messages to understand follow-up questions and remember details the user has shared during this conversation. If a user's query is unrelated to budget travel, respond by stating that you do not know.`
   }
 ];
 
@@ -43,6 +43,9 @@ async function main(userMessage) {
   const assistantMessage = result.choices[0].message.content;
   // Save the reply so it is included with the next question.
   conversationHistory.push({ role: 'assistant', content: assistantMessage });
-  // Display the response on the page
-  responseContainer.textContent = assistantMessage;
+  // Show the full conversation so earlier messages stay visible.
+  responseContainer.textContent = conversationHistory
+    .slice(1)
+    .map((message) => `${message.role === 'user' ? 'You' : 'WanderBot'}: ${message.content}`)
+    .join('\n\n');
 };
