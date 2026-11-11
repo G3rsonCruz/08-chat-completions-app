@@ -32,3 +32,4 @@ async function main() {
   // Display the response on the page
   responseContainer.textContent = result.choices[0].message.content;
 };
+main()
